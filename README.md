@@ -86,12 +86,12 @@ L'architecture adopte un modèle **distribué réactif** :
 | # | Service | Responsable | Base de données | Responsabilités |
 |---|---------|-------------|-----------------|-----------------|
 | — | **Auth & User/Vendor Service** | *Toute l'équipe* | PostgreSQL + Keycloak | Authentification, JWT, RBAC, profils utilisateurs et vendeurs |
-| 1 | **Product & Catalog Service** | Hendez Badii | MongoDB | Catalogue, catégories, stocks, recherche produits + Eureka Server |
-| 2 | **Order Service** | Ben Azzoun Myriam | PostgreSQL | Panier, création et suivi des commandes + API Gateway |
-| 3 | **Payment & Billing Service** | Nouaigui Marouen | PostgreSQL | Paiement Sandbox (Konnect/Paymee), facturation + RabbitMQ/Kafka |
-| 4 | **Delivery & Logistics Service** | Jdid Aziz | PostgreSQL | Assignation livreurs, suivi expéditions + Docker Compose |
-| 5 | **Dispute & Customer Support** | Zerzeri Yasmine | PostgreSQL | Litiges, réclamations, retours (RMA) via Spring StateMachine |
-| 6 | **Review & Notification Service** | Ben Maghzouz Ahmed | MongoDB | Avis/notes produits, notifications asynchrones + coord. Frontend Angular |
+| 1 | **Product & Catalog Service** | Hendez Badii | Postgresql | Catalogue, catégories, stocks, recherche produits + Eureka Server |
+| 2 | **Order Service** | Ben Azzoun Myriam | MYSQL | Panier, création et suivi des commandes + API Gateway |
+| 3 | **Payment & Billing Service** | Nouaigui Marouen | MYSQL | Paiement Sandbox (Konnect/Paymee), facturation + RabbitMQ/Kafka |
+| 4 | **Delivery & Logistics Service** | Jdidi Aziz | MYSQL | Assignation livreurs, suivi expéditions + Docker Compose |
+| 5 | **Dispute & Customer Support** | Zerzeri Yasmine | MYSQL | Litiges, réclamations, retours (RMA) via Spring StateMachine |
+| 6 | **Review & Notification Service** | Ben Maghzouz Ahmed | Mysql | Avis/notes produits, notifications asynchrones + coord. Frontend Angular |
 
 ---
 
