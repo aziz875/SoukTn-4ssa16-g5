@@ -42,31 +42,7 @@ Le retrait de Jumia du marché tunisien a mis en lumière l'absence d'une altern
 
 L'architecture adopte un modèle **distribué réactif** :
 
-```
-                        ┌──────────────────────────┐
-                        │      Angular Frontend      │
-                        └────────────┬─────────────┘
-                                     │ HTTPS
-                        ┌────────────▼─────────────┐
-                        │   API Gateway             │
-                        │   (Spring Cloud Gateway)  │
-                        └──┬───┬───┬───┬───┬───┬───┘
-                           │   │   │   │   │   │
-              ┌────────────┘   │   │   │   │   └──────────────┐
-              ▼               ▼   ▼   ▼   ▼                  ▼
-       user-service   catalog  order  payment  delivery  dispute/review
-       (PostgreSQL)  (MongoDB) (PG)   (PG)     (PG)     (PG/MongoDB)
-                        │
-              ┌─────────▼──────────┐
-              │   Eureka Server    │   ← Service Discovery
-              └────────────────────┘
-                        │
-              ┌─────────▼──────────┐
-              │  RabbitMQ / Kafka  │   ← Messaging asynchrone
-              └────────────────────┘
-              │  Keycloak / JWT    │   ← Sécurité centralisée
-              └────────────────────┘
-```
+![Diagramme d'architecture globale SoukTn](Documentation/Diagrams/Architecture_Globale.jpg)
 
 ### Composants clés
 
