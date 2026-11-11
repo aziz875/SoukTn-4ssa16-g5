@@ -1,0 +1,44 @@
+# ── Node.js / Frontend ──────────────────────────────────────────────
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+.cache/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.local
+.env.*.local
+
+# ── Java / Spring Boot (Backend) ─────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+.mvn/
+.gradle/
+build/
+out/
+
+# ── IDE & OS ─────────────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ── Docker ───────────────────────────────────────────────────────────
+*.override.yml
+
+# ── Secrets ──────────────────────────────────────────────────────────
+*.pem
+*.key
+*.p12
+secrets/
