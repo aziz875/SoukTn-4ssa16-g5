@@ -1,18 +1,18 @@
 # SoukTn — 4SSA16 — Groupe 5
 
-> **Marketplace E-Commerce Multi-Vendeurs** tunisienne, moderne, évolutive et résiliente, basée sur une architecture distribuée en microservices.
+> **Marketplace e-commerce multi-vendeurs** tunisienne, évolutive et résiliente, basée sur une architecture en microservices.
 
 ---
 
 ## 📋 Problématique
 
-Le retrait de Jumia du marché tunisien a mis en lumière l'absence d'une alternative nationale robuste. Les solutions existantes souffrent de :
-- **Couplage fort** : la défaillance d'un module peut paralyser toute la plateforme.
-- **Scalabilité limitée** : impossible d'allouer des ressources ciblées aux services surchargés.
-- **Complexité multi-vendeurs** : gestion difficile des flux hétérogènes (stocks, livraisons, commissions).
-- **Rigidité des données** : impossible de combiner données financières strictes et catalogues NoSQL flexibles.
+Le retrait de Jumia du marché tunisien (fin 2024) a mis en lumière l'absence d'une alternative nationale robuste. Une plateforme monolithique souffrirait de :
+- **Couplage fort** : la défaillance d'un module (ex. paiement) peut paralyser toute la plateforme.
+- **Scalabilité limitée** : impossible d'allouer des ressources ciblées aux services les plus sollicités.
+- **Complexité multi-vendeurs** : flux hétérogènes (stocks, livraisons, paiements, litiges) difficiles à faire évoluer dans un même code.
+- **Rigidité des données** : un modèle unique doit stocker à la fois des données financières strictes et des fiches produits aux attributs variables.
 
-**SoukTn** répond à ces problèmes via une architecture microservices autonome, hautement disponible et adaptée au marché tunisien.
+**SoukTn** répond à ces problèmes avec 7 microservices autonomes, chacun propriétaire de sa base de données.
 
 ---
 
@@ -20,96 +20,108 @@ Le retrait de Jumia du marché tunisien a mis en lumière l'absence d'une altern
 
 | Acteur | Rôle |
 |--------|------|
-| **Client (Acheteur)** | Parcourt le catalogue, gère son panier, passe des commandes, effectue des paiements, suit ses livraisons, laisse des avis |
-| **Vendeur (Marchand)** | Gère sa boutique, publie ses produits, gère ses stocks et consulte les commandes |
-| **Livreur** | Reçoit les ordres d'expédition, met à jour le statut d'acheminement |
-| **Administrateur** | Modère la plateforme, valide les comptes vendeurs, supervise l'activité globale |
+| **Visiteur** | Consulte le catalogue, recherche des produits, remplit un panier, s'inscrit |
+| **Client** | Passe et paie ses commandes, suit ses livraisons, consulte ses factures, laisse des avis, ouvre des litiges |
+| **Vendeur** | Gère sa boutique, ses produits et ses stocks, consulte ses commandes reçues, répond aux litiges |
+| **Livreur** | Consulte ses livraisons assignées et met à jour leur statut |
+| **Administrateur** | Gère les utilisateurs, valide les vendeurs, gère les catégories, assigne les livraisons, traite les litiges |
+
+Acteurs secondaires (systèmes) : **Keycloak**, **passerelle de paiement** (Konnect / Paymee sandbox), **serveur e-mail (SMTP)**.
 
 ---
 
-## ✨ Principales Fonctionnalités
+## ✨ Principales fonctionnalités
 
-- 🔐 **Gestion des comptes & autorisations** : Inscription, connexion sécurisée JWT, contrôle d'accès basé sur les rôles (RBAC).
-- 🛍️ **Catalogue multi-marchands** : CRUD produits, gestion des catégories, des stocks et recherche fluide.
-- 🛒 **Tunnel d'achat & Commandes** : Panier, validation de commande, suivi d'état (Créée → Payée → Expédiée → Livrée → Annulée).
-- 💳 **Paiement sécurisé** : Intégration Sandbox (Konnect / Paymee) + simulation Mock, émission de factures.
-- 🚚 **Logistique & Expédition** : Attribution des livraisons aux livreurs, suivi des étapes de transport.
-- 🔔 **Notifications & Feedback** : Alertes asynchrones, système de notation et avis par produit.
+- 🔐 **Comptes & autorisations** : authentification déléguée à Keycloak (OpenID Connect, JWT), rôles CLIENT / VENDOR / ADMIN / DELIVERY.
+- 🛍️ **Catalogue multi-vendeurs** : produits, catégories, stocks, recherche plein texte.
+- 🛒 **Panier & commandes** : panier, commande, suivi (En attente → Confirmée → Expédiée → Livrée ; annulation possible uniquement avant paiement).
+- 💳 **Paiement & facturation** : Konnect / Paymee en sandbox + simulation (mock), factures PDF, remboursements.
+- 🚚 **Livraison** : assignation des livreurs, suivi des étapes.
+- ⚖️ **Litiges & retours** : cycle de vie géré par Spring StateMachine.
+- 🔔 **Avis & notifications** : avis sur produits achetés et livrés, notifications e-mail et dans l'application.
 
 ---
 
-## 🏗️ Architecture Globale
-
-L'architecture adopte un modèle **distribué réactif** :
+## 🏗️ Architecture globale
 
 ![Diagramme d'architecture globale SoukTn](Documentation/Diagrams/Architecture_Globale.jpg)
 
-### Composants clés
+### Composants d'infrastructure
 
-| Composant | Technologie | Rôle |
-|-----------|------------|------|
-| **API Gateway** | Spring Cloud Gateway | Point d'entrée unique, routage, filtrage, load balancing |
-| **Service Discovery** | Spring Cloud Eureka | Enregistrement dynamique et localisation des microservices |
-| **Sécurité centralisée** | Keycloak + Spring Security JWT | Gestion des identités, Bearer Token, RBAC |
-| **Comm. synchrone** | REST / OpenFeign | Échanges directs à réponse immédiate |
-| **Comm. asynchrone** | RabbitMQ / Apache Kafka | Découplage des événements métier (ex: `ORDER_CREATED`) |
-| **Résilience** | Resilience4j (Circuit Breaker) | Mode dégradé (Fallback) en cas de panne |
+| Composant | Technologie | Port | Rôle |
+|-----------|-------------|------|------|
+| **API Gateway** | Spring Cloud Gateway | 8080 | Point d'entrée unique, validation du JWT, routage `lb://`, CORS |
+| **Discovery Server** | Spring Cloud Netflix Eureka | 8761 | Enregistrement et localisation des microservices |
+| **Config Server** | Spring Cloud Config | 8888 | Configuration centralisée (dossier `config-repo`), mode Discovery First |
+| **Keycloak** | Keycloak (realm `marketplace`) | 8180 | Identités, connexion OIDC, émission des JWT, rôles |
+| **RabbitMQ** | RabbitMQ (exchange `marketplace.events`, type topic) | 5672 / 15672 | Communication asynchrone par événements |
+
+### Communications
+- **Synchrone** (REST / OpenFeign + Resilience4j) : uniquement quand la réponse est nécessaire pour continuer — Order → User, Order → Catalog, Dispute → Order.
+- **Asynchrone** (RabbitMQ) : 7 événements — `USER_REGISTERED`, `ORDER_CREATED`, `ORDER_CANCELLED`, `PAYMENT_COMPLETED`, `PAYMENT_FAILED`, `DELIVERY_UPDATED`, `DISPUTE_RESOLVED`. Files durables, consommateurs idempotents (`eventId`), DLQ après 3 échecs.
 
 ---
 
 ## 🧩 Microservices
 
-| # | Service | Responsable | Base de données | Responsabilités |
-|---|---------|-------------|-----------------|-----------------|
-| — | **Auth & User/Vendor Service** | *Toute l'équipe* | PostgreSQL + Keycloak | Authentification, JWT, RBAC, profils utilisateurs et vendeurs |
-| 1 | **Product & Catalog Service** | Hendez Badii | Postgresql | Catalogue, catégories, stocks, recherche produits + Eureka Server |
-| 2 | **Order Service** | Ben Azzoun Myriam | MYSQL | Panier, création et suivi des commandes + API Gateway |
-| 3 | **Payment & Billing Service** | Nouaigui Marouen | MYSQL | Paiement Sandbox (Konnect/Paymee), facturation + RabbitMQ/Kafka |
-| 4 | **Delivery & Logistics Service** | Jdidi Aziz | MYSQL | Assignation livreurs, suivi expéditions + Docker Compose |
-| 5 | **Dispute & Customer Support** | Zerzeri Yasmine | MYSQL | Litiges, réclamations, retours (RMA) via Spring StateMachine |
-| 6 | **Review & Notification Service** | Ben Maghzouz Ahmed | Mysql | Avis/notes produits, notifications asynchrones + coord. Frontend Angular |
+| # | Service | Port | Responsable | Base de données | Responsabilités | Infra |
+|---|---------|------|-------------|-----------------|-----------------|-------|
+| 0 | **User & Vendor Service** (commun) | 8081 | *Toute l'équipe* | MySQL `user_db` | Profils, adresses, boutiques, validation des vendeurs (comptes créés dans Keycloak via l'API Admin) | Keycloak (équipe) |
+| 1 | **Product & Catalog Service** | 8082 | Hendez Badii | PostgreSQL `catalog_db` | Catalogue, catégories, stocks, recherche (JSONB, plein texte) | Discovery Server |
+| 2 | **Order Service** | 8083 | Ben Azzoun Myriam | MySQL `order_db` | Panier, commandes, suivi | API Gateway |
+| 3 | **Payment & Billing Service** | 8084 | Nouaigui Marouen | MySQL `payment_db` | Paiement sandbox (Konnect / Paymee) + mock, factures, remboursements | RabbitMQ + Config Server |
+| 4 | **Delivery & Logistics Service** | 8085 | Jdidi Aziz | MySQL `delivery_db` | Assignation des livreurs, suivi des expéditions | Docker Compose |
+| 5 | **Dispute & Support Service** | 8086 | Zerzeri Yasmine | MySQL `dispute_db` | Litiges, retours, Spring StateMachine | Support architecture |
+| 6 | **Review & Notification Service** | 8087 | Ben Maghzouz Ahmed | MySQL `notification_db` | Avis produits, notifications e-mail et in-app | Base Frontend Angular |
+
+Keycloak utilise sa propre base PostgreSQL `keycloak_db`. Aucune base n'est partagée entre services.
 
 ---
 
-## 🛠️ Stack Technique
+## 🛠️ Stack technique
 
 | Couche | Technologies |
 |--------|-------------|
-| **Backend** | Java 21, Spring Boot 3.x, Spring Cloud (Gateway, Eureka, OpenFeign), Spring Data JPA, Spring Security |
-| **Frontend** | Angular 21, Bootstrap, Angular Material |
-| **Bases de données** | MySQL / PostgreSQL (relationnel), MongoDB (NoSQL) |
-| **Messaging** | RabbitMQ / Apache Kafka |
-| **Sécurité** | Keycloak, JWT, Resilience4j (Circuit Breaker) |
+| **Backend** | Java 21, Spring Boot 3.x, Spring Cloud (Gateway, Eureka, Config, OpenFeign), Spring Data JPA, Spring Security (Resource Server), Spring StateMachine |
+| **Frontend** | Angular 21, Bootstrap, Angular Material, keycloak-angular |
+| **Bases de données** | MySQL (6 services), PostgreSQL (catalogue, Keycloak) |
+| **Messaging** | RabbitMQ |
+| **Sécurité** | Keycloak, OAuth2 / OpenID Connect, JWT |
+| **Résilience** | Resilience4j (timeout, retry, circuit breaker) |
 | **Conteneurisation** | Docker, Docker Compose |
-| **API Docs** | Swagger / OpenAPI |
+| **API Docs** | Swagger / OpenAPI (springdoc) |
 
 ---
 
-## 📁 Structure du Dépôt
+## 📁 Structure du dépôt
 
 ```
 SoukTn-4ssa16-g5/
 ├── Backend/
 │   ├── api-gateway/
 │   ├── discovery-server/
+│   ├── config-server/
+│   ├── config-repo/          # fichiers YAML lus par le Config Server
 │   ├── user-service/
 │   ├── catalog-service/
 │   ├── order-service/
 │   ├── payment-service/
 │   ├── delivery-service/
-│   ├── notification-service/
-│   └── dispute-service/
+│   ├── dispute-service/
+│   └── notification-service/
 ├── Frontend/
 │   └── ecommerce-web-app/
 ├── Documentation/
 │   ├── Presentation/
-│   │   └── Seance4_Presentation.pdf
 │   └── Diagrams/
-│       ├── Architecture_Globale.png
-│       └── Class_Diagrams/
 ├── docker-compose.yml
 └── README.md
 ```
+
+### Conventions
+- `groupId` : `tn.souktn` — package : `tn.souktn.<service>`
+- `spring.application.name` : `user`, `catalog`, `order`, `payment`, `delivery`, `dispute`, `notification` (correspond aux routes `lb://USER`, `lb://CATALOG`… de la Gateway)
+- Ordre de démarrage : Discovery Server → Config Server → Keycloak / RabbitMQ / bases → microservices → Gateway
 
 ---
 
@@ -118,37 +130,39 @@ SoukTn-4ssa16-g5/
 | Branche | Rôle |
 |---------|------|
 | `main` | Version stable, prête à la démo |
-| `develop` | Branche d'intégration continue |
-| `feature/<service>` | Développement par microservice (ex: `feature/catalog-service`) |
+| `develop` | Branche d'intégration |
+| `feature/<service>` | Développement par microservice (ex. `feature/catalog-service`) |
+| `docs/<sujet>` | Documentation |
+
+Chaque branche est fusionnée par Pull Request relue par un autre membre. Commits au format Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`).
 
 ---
 
-## 🗓️ Planning (Sprints)
+## 🗓️ Planning (sprints)
 
 | Sprint | Thème | Contenu |
 |--------|-------|---------|
-| **Sprint 1** | Conception | Analyse des besoins, architecture, diagrammes UML, squelettes des microservices |
-| **Sprint 2** | CRUDs Métiers | API REST de base, Eureka, API Gateway, Docker Compose BDD |
-| **Sprint 3** | Avancé & Communication | Spring StateMachine, paiement Sandbox, OpenFeign, RabbitMQ, intégration Angular |
-| **Sprint 4** | Tests & Recette | Tests d'intégration, montée en charge, sécurité Keycloak, conteneurisation finale |
+| **Sprint 1** | Conception | Besoins, architecture, diagrammes UML, contrats d'API, squelettes des microservices |
+| **Sprint 2** | Socle & CRUD | API REST de base, Discovery Server, Config Server, API Gateway, Docker Compose des bases |
+| **Sprint 3** | Communications & logique avancée | OpenFeign, RabbitMQ, Spring StateMachine, paiement sandbox, sécurité Keycloak, intégration Angular |
+| **Sprint 4** | Tests & livraison | Tests d'intégration, conteneurisation complète, recette |
 
 ---
 
-## ⚠️ Gestion des Risques
+## ⚠️ Gestion des risques
 
 | Risque | Impact | Mitigation |
 |--------|--------|-----------|
-| Incohérence des API inter-services | 🔴 Élevé | Contrats d'API stricts via Swagger/OpenAPI |
-| Panne d'un microservice | 🔴 Élevé | Circuit Breaker Resilience4j à l'API Gateway |
-| Communication asynchrone complexe | 🟡 Moyen | POC RabbitMQ en phase initiale |
-| Retard intégration Frontend | 🟡 Moyen | Mocks & Swagger pour consommation anticipée |
+| Incohérence des API inter-services | 🔴 Élevé | Contrats d'API stricts via Swagger / OpenAPI |
+| Panne d'un microservice | 🔴 Élevé | Resilience4j (timeout, retry, circuit breaker) sur les appels OpenFeign |
+| Perte ou doublon d'événements | 🟡 Moyen | Files durables, consommateurs idempotents (`eventId`), DLQ |
+| Sandbox de paiement indisponible | 🟡 Moyen | Simulation interne (mock) derrière la même interface |
+| Retard d'intégration du frontend | 🟡 Moyen | Mocks et Swagger pour une consommation anticipée |
 
 ---
 
-## 🔗 Liens
+## 📂 Documentation
 
-- 📄 [Documentation technique](Documentation/)
-- 🖼️ [Diagrammes](Documentation/Diagrams/)
-- 🎤 [Présentation Séance 4](Documentation/Presentation/)
-- 📌 Tableau Kanban : *(Trello / Jira — lien à compléter)*
-- 📖 API Docs (Swagger) : *(lien à compléter)*
+- `Documentation/` : documentation technique du projet
+- `Documentation/Diagrams/` : diagramme d'architecture globale et diagrammes UML
+- `Documentation/Presentation/` : supports de présentation
