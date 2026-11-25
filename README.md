@@ -82,7 +82,7 @@ Keycloak utilise sa propre base PostgreSQL `keycloak_db`. Aucune base n'est part
 
 | Couche | Technologies |
 |--------|-------------|
-| **Backend** | Java 21, Spring Boot 3.x, Spring Cloud (Gateway, Eureka, Config, OpenFeign), Spring Data JPA, Spring Security (Resource Server), Spring StateMachine |
+| **Backend** | Java 21, Spring Boot 4.2.0, Spring Cloud (Gateway, Eureka, Config, OpenFeign), Spring Data JPA, Spring Security (Resource Server), Spring StateMachine |
 | **Frontend** | Angular 21, Bootstrap, Angular Material, keycloak-angular |
 | **Bases de données** | MySQL (6 services), PostgreSQL (catalogue, Keycloak) |
 | **Messaging** | RabbitMQ |
@@ -119,6 +119,7 @@ SoukTn-4ssa16-g5/
 ```
 
 ### Conventions
+- Versions : Java 21, Spring Boot 4.2.0 (Spring Cloud 2026.0.0), Maven, configuration en YAML (`application.yml`)
 - `groupId` : `tn.souktn` — package : `tn.souktn.<service>`
 - `spring.application.name` : `user`, `catalog`, `order`, `payment`, `delivery`, `dispute`, `notification` (correspond aux routes `lb://USER`, `lb://CATALOG`… de la Gateway)
 - Ordre de démarrage : Discovery Server → Config Server → Keycloak / RabbitMQ / bases → microservices → Gateway
