@@ -1,0 +1,64 @@
+### 1. Create a Driver (POST)
+POST http://localhost:8085/api/drivers
+Content-Type: application/json
+
+{
+  "fullName": "Sami Ben Ali",
+  "phone": "+21620111222",
+  "email": "sami.benali@souktn.tn",
+  "vehicleType": "MOTORCYCLE",
+  "zone": "Tunis",
+  "available": true
+}
+
+### 2. Get All Drivers (GET)
+GET http://localhost:8085/api/drivers
+
+### 3. Update Driver #1 (PUT)
+PUT http://localhost:8085/api/drivers/1
+Content-Type: application/json
+
+{
+  "fullName": "Sami Ben Ali",
+  "phone": "+21620999888",
+  "email": "sami.benali@souktn.tn",
+  "vehicleType": "CAR",
+  "zone": "Ariana",
+  "available": true
+}
+
+### 4. Create a Delivery (POST)
+POST http://localhost:8085/api/deliveries
+Content-Type: application/json
+
+{
+  "orderId": 101,
+  "customerName": "Amira Trabelsi",
+  "customerPhone": "+21699333444",
+  "shippingAddress": "15 Avenue Habib Bourguiba",
+  "city": "Tunis"
+}
+
+### 5. Get All Deliveries (GET)
+GET http://localhost:8085/api/deliveries
+
+### 6. Assign Driver #1 to Delivery #1 (PATCH)
+PATCH http://localhost:8085/api/deliveries/1/assign/1
+
+### 7. Update Delivery #1 Status to DELIVERED (PATCH)
+PATCH http://localhost:8085/api/deliveries/1/status?status=DELIVERED&location=Tunis%20Centre&notes=Delivered%20to%20customer
+
+### 8. Get Tracking History of Delivery #1 (GET)
+GET http://localhost:8085/api/deliveries/1/tracking-events
+
+### 9. Actuator Health & Info (GET)
+GET http://localhost:8085/actuator/health
+
+###
+GET http://localhost:8085/actuator/info
+
+### 10. Delete Delivery #1 (DELETE)
+DELETE http://localhost:8085/api/deliveries/1
+
+### 11. Delete Driver #1 (DELETE)
+DELETE http://localhost:8085/api/drivers/1
