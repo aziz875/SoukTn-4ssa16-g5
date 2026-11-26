@@ -1,0 +1,28 @@
+# FICHIER COMMUN : envoyé à TOUS les services.
+# Ne mettre ici que ce qui est partagé (Eureka, RabbitMQ, Keycloak).
+# Réglages propres à un service -> config-repo/<nom-du-service>.yml (prioritaire).
+# Toute modification de ce fichier : PR + accord de l'équipe.
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
+
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/marketplace
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
