@@ -19,7 +19,7 @@ target/
 *.jar
 *.war
 *.ear
-.mvn/
+.mvn/wrapper/maven-wrapper.jar
 .gradle/
 build/
 out/

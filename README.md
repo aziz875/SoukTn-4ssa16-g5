@@ -126,6 +126,37 @@ SoukTn-4ssa16-g5/
 
 ---
 
+## ➕ Ajouter un service au backend
+
+Toutes les versions sont imposées par le POM parent `Backend/pom.xml` (`tn.souktn:souktn-backend`). Un service ne déclare **aucune** version.
+
+1. `git checkout main && git pull`, puis `git checkout -b feature/<service>`.
+2. Générer le projet dans `Backend/` (IntelliJ ou start.spring.io) : Maven, Java 21, Spring Boot 4.2.0, configuration YAML, group `tn.souktn`, package `tn.souktn.<service>`, sans créer de dépôt Git.
+3. Dans `Backend/<service>/pom.xml`, remplacer le bloc `<parent>` par le bloc ci-dessous, puis supprimer `<groupId>`, `<version>`, `<properties>` et `<dependencyManagement>`. Les dépendances restent **sans version**.
+
+   ```xml
+   <parent>
+       <groupId>tn.souktn</groupId>
+       <artifactId>souktn-backend</artifactId>
+       <version>1.0.0-SNAPSHOT</version>
+       <relativePath>../pom.xml</relativePath>
+   </parent>
+   ```
+
+4. Ajouter `<module>nom-du-dossier</module>` dans la section `<modules>` de `Backend/pom.xml`.
+5. Vérifier depuis `Backend/` : `mvn clean package -DskipTests` doit afficher `SUCCESS` pour tous les modules.
+
+Exemple de référence : `Backend/config-server/pom.xml`.
+
+### Checklist du relecteur (PR d'un nouveau service)
+- [ ] Le `<parent>` est `souktn-backend`
+- [ ] Aucune version de Spring Boot, Spring Cloud ou Java dans le `pom.xml` du service
+- [ ] Le module est ajouté dans `Backend/pom.xml`
+- [ ] `mvn clean package -DskipTests` réussit depuis `Backend/`
+- [ ] `spring.application.name` respecte la convention
+
+---
+
 ## 🌿 Gitflow
 
 | Branche | Rôle |
