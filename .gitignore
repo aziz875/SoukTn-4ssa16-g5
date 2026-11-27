@@ -1,44 +1,96 @@
-# ── Node.js / Frontend ──────────────────────────────────────────────
-node_modules/
-dist/
-build/
-.next/
-.nuxt/
-.cache/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Environment & Credentials
 .env
 .env.local
 .env.*.local
+*.properties.local
 
-# ── Java / Spring Boot (Backend) ─────────────────────────────────────
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build
 target/
 *.class
 *.jar
 *.war
 *.ear
-.mvn/wrapper/maven-wrapper.jar
+*.zip
+
+# Logs
+logs/
+*.log
+*.log.*
+/tmp/
+
+# Maven
+.m2/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+
+# Gradle
 .gradle/
 build/
-out/
 
-# ── IDE & OS ─────────────────────────────────────────────────────────
-.idea/
-*.iml
-.vscode/
-*.suo
-*.user
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.h2.db
+
+# OS
 Thumbs.db
 .DS_Store
-desktop.ini
 
-# ── Docker ───────────────────────────────────────────────────────────
-*.override.yml
+# Temporary
+temp/
+tmp/
+*.tmp
+*.bak
 
-# ── Secrets ──────────────────────────────────────────────────────────
-*.pem
-*.key
-*.p12
+# Credentials & Sensitive
 secrets/
+credentials/
+.aws/
+.ssh/
+authorized_keys
+private_key*
+*.pem
+
+# MySQL/Database backups
+*.sql
+*.sql.gz
+database_dumps/
+backups/
+
+# Node (if used)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Python (if used)
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# CI/CD
+.github/workflows/secrets/
+
+# Local configuration files
+local/
+config.local.yml
+config.local.yaml
+config.local.properties
