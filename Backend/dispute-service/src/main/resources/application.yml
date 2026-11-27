@@ -1,0 +1,8 @@
+# Le nom doit être "dispute" : il sert à la fois pour Eureka (DISPUTE),
+# pour la route lb://DISPUTE de la Gateway et pour trouver config-repo/dispute.yml.
+# Le port (8086) et l'adresse d'Eureka viennent du Config Server (config-repo).
+spring:
+  application:
+    name: dispute
+  config:
+    import: configserver:http://localhost:8888

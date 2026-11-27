@@ -23,6 +23,7 @@
     <!-- 3. Liste des services du backend (chaque membre ajoute le sien) -->
     <modules>
         <module>config-server</module>
+        <module>dispute-service</module>
     </modules>
 
     <!-- 4. Versions communes -->
