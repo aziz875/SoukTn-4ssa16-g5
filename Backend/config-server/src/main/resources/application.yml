@@ -10,13 +10,12 @@ spring:
     config:
       server:
         native:
-          search-locations: file:../config-repo/
+          search-locations: file:./Backend/config-repo/,file:../config-repo/
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
-    register-with-eureka: true
-    fetch-registry: true
+#    register-with-eureka: true
+#    fetch-registry: true
   instance:
     prefer-ip-address: true
-
