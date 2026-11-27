@@ -22,6 +22,7 @@
 
     <!-- 3. Liste des services du backend (chaque membre ajoute le sien) -->
     <modules>
+        <module>eurekaServer</module>
         <module>config-server</module>
         <module>delivery-service</module>
         <module>payment-service</module>
