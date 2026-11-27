@@ -25,6 +25,7 @@
         <module>config-server</module>
         <module>delivery-service</module>
         <module>payment-service</module>
+        <module>user-service</module>
     </modules>
 
     <!-- 4. Versions communes -->
