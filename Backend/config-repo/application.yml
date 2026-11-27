@@ -1,5 +1,5 @@
 # FICHIER COMMUN : envoyé à TOUS les services.
-# Ne mettre ici que ce qui est partagé (Eureka, RabbitMQ, Keycloak).
+# Ne mettre ici que ce qui est partagé (Eureka, RabbitMQ, Keycloak, Actuator).
 # Réglages propres à un service -> config-repo/<nom-du-service>.yml (prioritaire).
 # Toute modification de ce fichier : PR + accord de l'équipe.
 eureka:
@@ -21,8 +21,20 @@ spring:
         jwt:
           issuer-uri: http://localhost:8180/realms/marketplace
 
+# Observabilité (Actuator) : endpoints exposés pour tous les services
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,env,beans,mappings,loggers,configprops
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    project: SoukTn
+    team: 4SSA16 - Groupe 5
