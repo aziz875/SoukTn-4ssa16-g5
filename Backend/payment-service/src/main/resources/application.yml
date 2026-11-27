@@ -4,10 +4,10 @@ spring:
   config:
     import: optional:configserver:${SPRING_CONFIG_IMPORT:http://localhost:8888}
   datasource:
-    url: jdbc:h2:mem:payment_db
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:payment_db}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
@@ -15,10 +15,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
 
 server:
   port: ${SERVER_PORT:8084}

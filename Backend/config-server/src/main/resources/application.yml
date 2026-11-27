@@ -39,5 +39,5 @@ info:
   app:
     name: config-server
     version: 1.0.0
-    description: Spring Cloud Config Server - configuration centralisée (SoukTn)
+    description: Spring Cloud Config Server - configuration centralisee (SoukTn)
     team: SoukTn - 4SSA16 - Groupe 5
