@@ -11,9 +11,9 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>eureka-server</artifactId>
-    <name>eureka-server</name>
-    <description>Spring Cloud Eureka Server - service discovery de SoukTn</description>
+    <artifactId>discovery-server</artifactId>
+    <name>discovery-server</name>
+    <description>Spring Cloud Service Discovery Server - Eureka-based service discovery de SoukTn</description>
 
     <dependencies>
         <dependency>
