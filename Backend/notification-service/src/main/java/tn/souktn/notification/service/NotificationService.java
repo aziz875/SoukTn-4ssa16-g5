@@ -3,7 +3,9 @@ package tn.souktn.notification.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tn.souktn.notification.dto.CreateNotificationRequest;
 import tn.souktn.notification.entity.Notification;
+import tn.souktn.notification.entity.NotificationChannel;
 import tn.souktn.notification.entity.NotificationStatus;
 import tn.souktn.notification.exception.ResourceNotFoundException;
 import tn.souktn.notification.repository.NotificationRepository;
@@ -17,9 +19,13 @@ public class NotificationService {
     private final NotificationRepository repository;
 
     @Transactional
-    public Notification create(Notification notification) {
-        notification.setStatus(NotificationStatus.UNREAD);
-        notification.setReadAt(null);
+    public Notification create(CreateNotificationRequest request) {
+        Notification notification = new Notification();
+        notification.setRecipientId(request.recipientId());
+        notification.setTitle(request.title());
+        notification.setMessage(request.message());
+        notification.setActionUrl(request.actionUrl());
+        notification.setChannel(request.channel() == null ? NotificationChannel.IN_APP : request.channel());
         return repository.save(notification);
     }
 

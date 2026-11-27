@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import tn.souktn.notification.entity.Notification;
+import tn.souktn.notification.dto.CreateNotificationRequest;
 import tn.souktn.notification.service.NotificationService;
 
 @Component
@@ -13,11 +14,12 @@ public class NotificationListener {
 
     @RabbitListener(queues = "${notification.queue.name:notification.events}")
     public void receive(NotificationEvent event) {
-        Notification notification = new Notification();
-        notification.setRecipientId(event.getRecipientId());
-        notification.setTitle(event.getTitle());
-        notification.setMessage(event.getMessage());
-        notification.setActionUrl(event.getActionUrl());
-        notificationService.create(notification);
+        CreateNotificationRequest request = new CreateNotificationRequest(
+                event.getRecipientId(),
+                event.getTitle(),
+                event.getMessage(),
+                event.getActionUrl(),
+                null);
+        notificationService.create(request);
     }
 }
