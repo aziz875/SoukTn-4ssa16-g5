@@ -66,7 +66,7 @@ Acteurs secondaires (systèmes) : **Keycloak**, **passerelle de paiement** (Konn
 
 | # | Service | Port | Responsable | Base de données | Responsabilités | Infra |
 |---|---------|------|-------------|-----------------|-----------------|-------|
-| 0 | **User & Vendor Service** (commun) | 8081 | *Toute l'équipe* | MySQL `user_db` | Profils, adresses, boutiques, validation des vendeurs (comptes créés dans Keycloak via l'API Admin) | Keycloak (équipe) |
+| 0 | **User Service** (FastAPI) | 8081 | *Toute l'équipe* | MySQL `microservice` | Création publique et gestion des profils utilisateurs | Eureka ; Keycloak pour les opérations protégées |
 | 1 | **Product & Catalog Service** | 8082 | Hendez Badii | PostgreSQL `catalog_db` | Catalogue, catégories, stocks, recherche (JSONB, plein texte) | Discovery Server |
 | 2 | **Order Service** | 8083 | Ben Azzoun Myriam | MySQL `order_db` | Panier, commandes, suivi | API Gateway |
 | 3 | **Payment & Billing Service** | 8084 | Nouaigui Marouen | MySQL `payment_db` | Paiement sandbox (Konnect / Paymee) + mock, factures, remboursements | RabbitMQ + Config Server |
@@ -74,7 +74,9 @@ Acteurs secondaires (systèmes) : **Keycloak**, **passerelle de paiement** (Konn
 | 5 | **Dispute & Support Service** | 8086 | Zerzeri Yasmine | MySQL `dispute_db` | Litiges, retours, Spring StateMachine | Support architecture |
 | 6 | **Review & Notification Service** | 8087 | Ben Maghzouz Ahmed | MySQL `notification_db` | Avis produits, notifications e-mail et in-app | Base Frontend Angular |
 
-Keycloak utilise sa propre base PostgreSQL `keycloak_db`. Aucune base n'est partagée entre services.
+Dans l'architecture cible, Keycloak utilise PostgreSQL `keycloak_db` et chaque
+microservice possède sa base. Dans ce checkout, le User Service FastAPI utilise
+actuellement `microservice`, y compris la table `user_profiles` existante.
 
 ---
 
@@ -82,7 +84,7 @@ Keycloak utilise sa propre base PostgreSQL `keycloak_db`. Aucune base n'est part
 
 | Couche | Technologies |
 |--------|-------------|
-| **Backend** | Java 21, Spring Boot 4.2.0, Spring Cloud (Gateway, Eureka, Config, OpenFeign), Spring Data JPA, Spring Security (Resource Server), Spring StateMachine |
+| **Backend** | Python 3.12 / FastAPI (User Service), Java 21 / Spring Boot 4.x, Spring Cloud (Eureka, Config), Spring Data JPA |
 | **Frontend** | Angular 21, Bootstrap, Angular Material, keycloak-angular |
 | **Bases de données** | MySQL (6 services), PostgreSQL (catalogue, Keycloak) |
 | **Messaging** | RabbitMQ |
@@ -123,7 +125,110 @@ SoukTn-4ssa16-g5/
 - `groupId` : `tn.souktn` — package : `tn.souktn.<service>`
 - `spring.application.name` : `user`, `catalog`, `order`, `payment`, `delivery`, `dispute`, `notification` (correspond aux routes `lb://USER`, `lb://CATALOG`… de la Gateway)
 - Ordre de démarrage : Discovery Server → Config Server → Keycloak / RabbitMQ / bases → microservices → Gateway
-- User profiles are managed by `Backend/notification-service` on port `8087`, registered in Eureka as `NOTIFICATION`, with CRUD endpoints under `/api/users`. Authentication credentials remain managed by Keycloak.
+
+## ▶️ Run the services in this checkout (Windows PowerShell)
+
+Open one PowerShell terminal per service and leave each running. These commands
+are for the modules present in this checkout: Eureka, Config Server, the Python
+FastAPI User Service, and optionally the Delivery Service. The `Frontend`
+directory currently has no app manifest, so there is no frontend start command
+in this checkout.
+
+### 1. Start the prerequisites
+
+- Start your local MySQL server first. The User Service defaults to
+  `localhost:3306` and the existing `microservice` database.
+- Java 21 is required by the backend parent build. Check it with
+  `java -version`.
+- The public `POST /api/users` endpoint does not require Keycloak. Keycloak is
+  needed only for protected user read/update/delete operations.
+
+### 2. Start Eureka
+
+From the repository root, in a new terminal:
+
+```powershell
+Set-Location .\Backend\eurekaServer
+.\mvnw.cmd spring-boot:run
+```
+
+Eureka dashboard: `http://localhost:8761`
+
+### 3. Start Config Server
+
+In another terminal:
+
+```powershell
+Set-Location .\Backend\config-server
+.\mvnw.cmd spring-boot:run
+```
+
+Config Server: `http://localhost:8888`
+
+### 4. Configure and start the FastAPI User Service
+
+In another terminal:
+
+```powershell
+Set-Location .\Backend\user-service
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+notepad .env
+```
+
+In `.env`, set `DB_PASSWORD` to your MySQL password if it is not blank. Keep
+`DB_NAME=microservice` to store profiles in the database shown in phpMyAdmin.
+Save the file, then run in that same terminal:
+
+```powershell
+uvicorn app.main:app --host 0.0.0.0 --port 8081
+```
+
+The service creates the database/table if missing (the MySQL account must have
+permission to create databases). It registers as `USER` in Eureka when Eureka
+is running.
+
+- Swagger: `http://localhost:8081/docs`
+- Health: `http://localhost:8081/actuator/health`
+- Create a profile without Keycloak: use `POST /api/users` in Swagger.
+- Profiles are stored in `microservice.user_profiles`. The existing table uses
+  the legacy `keycloak_id` column for the FastAPI-generated profile UUID.
+
+### Run the User Service tests
+
+With the User Service virtual environment active:
+
+```powershell
+python -m pytest
+```
+
+### 5. Optional: start the Delivery Service
+
+The Delivery Service also needs MySQL. In a separate terminal, set the database
+password before starting it:
+
+```powershell
+Set-Location .\Backend
+$env:DB_PASSWORD = "your-mysql-password"
+.\config-server\mvnw.cmd -f .\delivery-service\pom.xml spring-boot:run
+```
+
+It uses port `8085` and registers with Eureka. If your MySQL root password is
+blank, set `$env:DB_PASSWORD = ""` instead. This environment variable applies
+only to that PowerShell terminal.
+
+### Stop the services
+
+In each service terminal, press `Ctrl+C`. If the service is running in the
+background, stop only its own terminal/process; do not terminate unrelated
+Java, Python, or MySQL processes.
+
+> The architecture and service list above describe the broader target platform.
+> This checkout does not currently contain the Angular app, API Gateway,
+> Keycloak configuration, or all seven microservices; those components need
+> their own setup before the full platform can be launched.
 
 ---
 
