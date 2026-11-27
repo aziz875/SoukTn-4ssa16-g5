@@ -1,5 +1,5 @@
 server:
-  port: 8888
+  port: ${SERVER_PORT:8888}
 
 spring:
   application:
@@ -11,11 +11,33 @@ spring:
       server:
         native:
           search-locations: file:./Backend/config-repo/,file:../config-repo/
+
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
-#    register-with-eureka: true
-#    fetch-registry: true
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+    healthcheck:
+      enabled: true
   instance:
     prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers,env,beans,mappings,configprops
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: config-server
+    version: 1.0.0
+    description: Spring Cloud Config Server - configuration centralisee (SoukTn)
+    team: SoukTn - 4SSA16 - Groupe 5
