@@ -9,3 +9,30 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
+# --- Observabilité (atelier Actuator) ---
+# Propre à Dispute : le config-repo/application.yml commun est partagé avec toute l'équipe.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+eureka:
+  client:
+    # Transmet à Eureka le vrai statut de /health (DOWN si MySQL tombe)
+    healthcheck:
+      enabled: true
+
+info:
+  app:
+    name: dispute
+    version: 1.0.0
+    description: Microservice de gestion des litiges et du support client
+    team: SoukTn - 4SSA16 - Groupe 5
