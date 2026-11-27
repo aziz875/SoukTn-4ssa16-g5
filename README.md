@@ -124,6 +124,44 @@ SoukTn-4ssa16-g5/
 - `spring.application.name` : `user`, `catalog`, `order`, `payment`, `delivery`, `dispute`, `notification` (correspond aux routes `lb://USER`, `lb://CATALOG`… de la Gateway)
 - Ordre de démarrage : Discovery Server → Config Server → Keycloak / RabbitMQ / bases → microservices → Gateway
 
+## API Gateway
+
+The Spring Cloud Gateway project is in `Backend/api-gateway`. It is scoped to
+the Notification Service only and uses Eureka service discovery to route:
+
+| Gateway path | Eureka service |
+|---|---|
+| `/api/notifications/**` | `NOTIFICATION` |
+| `/api/reviews/**` | `NOTIFICATION` |
+
+Its Swagger UI documents the Notification API at
+`http://localhost:8080/swagger-ui.html`. Gateway and load-balancer debug logs
+are enabled to make route selection observable. The gateway uses Spring
+Cloud's default load-balancer strategy. No user-service or Keycloak
+configuration is included in this Gateway.
+
+### Start the Gateway (Windows PowerShell)
+
+Start Eureka, Config Server, and Notification Service first in separate
+terminals. Then, from the repository root, run:
+
+```powershell
+Set-Location .\Backend
+.\config-server\mvnw.cmd -pl api-gateway spring-boot:run
+```
+
+The Gateway listens on port `8080`. Its health endpoint is
+`http://localhost:8080/actuator/health`; the Notification Swagger portal is
+`http://localhost:8080/swagger-ui.html`. For notification routes and docs to
+resolve, Eureka (`8761`) and Notification Service (`8087`) should be running
+and registered.
+
+If port `8080` is already in use, start it on `8090` instead:
+
+```powershell
+.\config-server\mvnw.cmd -pl api-gateway spring-boot:run "-Dspring-boot.run.arguments=--server.port=8090"
+```
+
 ---
 
 ## ➕ Ajouter un service au backend

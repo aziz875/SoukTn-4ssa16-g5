@@ -22,9 +22,9 @@
 
     <!-- 3. Liste des services du backend (chaque membre ajoute le sien) -->
     <modules>
+        <module>api-gateway</module>
         <module>config-server</module>
         <module>delivery-service</module>
-        <module>payment-service</module>
         <module>notification-service</module>
     </modules>
 
@@ -48,6 +48,11 @@
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
                 <version>${springdoc.version}</version>
             </dependency>
         </dependencies>
