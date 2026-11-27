@@ -4,10 +4,10 @@ spring:
   config:
     import: optional:configserver:${SPRING_CONFIG_IMPORT:http://localhost:8888}
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:delivery_db}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: ${DB_USER:root}
+    url: ${DB_URL:jdbc:h2:mem:delivery_db}
+    username: ${DB_USER:sa}
     password: ${DB_PASSWORD:}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
   jpa:
     hibernate:
       ddl-auto: update
