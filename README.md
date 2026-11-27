@@ -123,7 +123,7 @@ SoukTn-4ssa16-g5/
 - `groupId` : `tn.souktn` — package : `tn.souktn.<service>`
 - `spring.application.name` : `user`, `catalog`, `order`, `payment`, `delivery`, `dispute`, `notification` (correspond aux routes `lb://USER`, `lb://CATALOG`… de la Gateway)
 - Ordre de démarrage : Discovery Server → Config Server → Keycloak / RabbitMQ / bases → microservices → Gateway
-- User profiles are managed by `Backend/user-service` on port `8081`, registered in Eureka as `USER`, with CRUD endpoints under `/api/users`. Authentication credentials remain managed by Keycloak.
+- User profiles are managed by `Backend/notification-service` on port `8087`, registered in Eureka as `NOTIFICATION`, with CRUD endpoints under `/api/users`. Authentication credentials remain managed by Keycloak.
 
 ---
 
