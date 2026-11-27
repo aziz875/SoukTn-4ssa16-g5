@@ -1,21 +1,21 @@
 #!/bin/bash
 
 # SoukTn Microservices - Startup Script with MySQL
-# MySQL: root / root1234
+# MySQL: root / 1234
 
 set -e
 
 MYSQL_HOST="localhost"
 MYSQL_PORT="3306"
 MYSQL_USER="root"
-MYSQL_PASSWORD="root1234"
+MYSQL_PASSWORD="1234"
 EUREKA_URI="http://localhost:8761/eureka"
 CONFIG_SERVER_URI="http://localhost:8888"
 
 BACKEND_DIR="Backend"
 
 echo "╔════════════════════════════════════════════════════════════════╗"
-echo "║   SoukTn Microservices - MySQL (root/root1234)                ║"
+echo "║   SoukTn Microservices - MySQL (root/1234)                    ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
 echo ""
 

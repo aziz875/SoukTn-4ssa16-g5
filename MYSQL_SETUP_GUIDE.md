@@ -6,7 +6,7 @@
 Host:     localhost
 Port:     3306
 User:     root
-Password: root1234
+Password: 1234
 ```
 
 ## Databases Created Automatically
@@ -38,7 +38,7 @@ Terminal 3 - Delivery Service (after Terminal 2 starts)
 cd Backend
 java -jar delivery-service/target/delivery-service-1.0.0-SNAPSHOT.jar \
   --DB_HOST=localhost --DB_PORT=3306 --DB_NAME=delivery_db \
-  --DB_USER=root --DB_PASSWORD=root1234 \
+  --DB_USER=root --DB_PASSWORD=1234 \
   --SERVER_PORT=8085 --EUREKA_URI=http://localhost:8761/eureka \
   --SPRING_CONFIG_IMPORT=http://localhost:8888
 ```
@@ -48,7 +48,7 @@ Terminal 4 - Payment Service (after Terminal 3 starts)
 cd Backend
 java -jar payment-service/target/payment-service-1.0.0-SNAPSHOT.jar \
   --DB_HOST=localhost --DB_PORT=3306 --DB_NAME=payment_db \
-  --DB_USER=root --DB_PASSWORD=root1234 \
+  --DB_USER=root --DB_PASSWORD=1234 \
   --SERVER_PORT=8084 --EUREKA_URI=http://localhost:8761/eureka \
   --SPRING_CONFIG_IMPORT=http://localhost:8888
 ```
@@ -78,4 +78,4 @@ curl http://localhost:8084/actuator/health
 
 ---
 
-**MySQL Credentials: root / root1234**
+**MySQL Credentials: root / 1234**
