@@ -70,18 +70,67 @@ Via Gateway (API Docs):    http://localhost:8081/api/deliveries/v3/api-docs
 
 ## 🔄 Load Balancing Configuration
 
+### API Gateway Implementation (RouteLocatorBuilder)
+
+**Location**: `Backend/api-gateway/src/main/java/tn/souktn/apigateway/ApiGatewayApplication.java`
+
+The API Gateway is built using Spring Cloud Gateway's `RouteLocatorBuilder` pattern:
+
+```java
+@Bean
+public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
+    return builder.routes()
+        .route("Payment", r -> r.path("/api/payments/**")
+            .uri("lb://payment"))
+        .route("Delivery", r -> r.path("/api/deliveries/**")
+            .uri("lb://delivery"))
+        .route("Catalog", r -> r.path("/api/catalog/**")
+            .uri("lb://catalog"))
+        .route("Order", r -> r.path("/api/orders/**")
+            .uri("lb://order"))
+        .route("User", r -> r.path("/api/users/**")
+            .uri("lb://user"))
+        .route("Notification", r -> r.path("/api/notifications/**")
+            .uri("lb://notification"))
+        .route("Dispute", r -> r.path("/api/disputes/**")
+            .uri("lb://dispute"))
+        .build();
+}
+```
+
+**How It Works**:
+1. **RouteLocatorBuilder**: Programmatic route configuration using fluent API
+2. **Route Matching**: Each route matches a path pattern (`/api/{service}/**`)
+3. **Load Balancer Prefix**: `lb://` prefix enables automatic load balancing
+4. **Service Lookup**: Service names (payment, delivery, etc.) resolved via Eureka
+5. **Request Distribution**: Requests distributed across all healthy instances
+
 ### Round-Robin Load Balancer
 - **Type**: Spring Cloud Load Balancer (Round-Robin)
 - **Configuration Location**: `Backend/api-gateway/src/main/resources/application.yml`
 - **Retry Policy**: 3 retries on `SERVICE_UNAVAILABLE` or `BAD_GATEWAY`
 - **Cache TTL**: 35 seconds for service discovery
+- **Ribbon**: Disabled (using modern Spring Cloud Load Balancer)
 
 ```yaml
 spring.cloud.loadbalancer:
   ribbon.enabled: false           # Disabled old Ribbon LB
   round-robin.enabled: true       # Round-Robin enabled
   cache.ttl: 35s                  # Service cache validity
+
+# Retry on failures
+spring.cloud.gateway.default-filters:
+  - name: Retry
+    args:
+      retries: 3
+      statuses: SERVICE_UNAVAILABLE,BAD_GATEWAY
 ```
+
+**Round-Robin Distribution**:
+- Request 1 → Instance 1
+- Request 2 → Instance 2
+- Request 3 → Instance 3
+- Request 4 → Instance 1 (cycles back)
 
 ### Gateway Routing (Load Balanced)
 Each route uses `lb://<service-name>` for automatic load balancing:
@@ -92,6 +141,27 @@ Each route uses `lb://<service-name>` for automatic load balancing:
 - `lb://user` → User Service(s) on 8089
 - `lb://notification` → Notification Service(s) on 8087
 - `lb://dispute` → Dispute Service(s) on 8086
+
+**Request Flow Example**:
+```
+Request: http://localhost:8081/api/payments/list
+   ↓
+Gateway matches: Path=/api/payments/**
+   ↓
+Routes to: lb://payment (via RouteLocatorBuilder)
+   ↓
+Load Balancer resolves "payment" in Eureka
+   ↓
+Finds all payment service instances
+   ↓
+Round-Robin picks next instance in rotation
+   ↓
+Forwards request to selected instance (e.g., 8084)
+   ↓
+Response flows back through gateway
+   ↓
+Returns to client: JSON response
+```
 
 ---
 
