@@ -42,6 +42,19 @@ sleep 5
 echo "  Started (PID: $CONFIG_PID)"
 echo ""
 
+# Start API Gateway
+echo "▶ Starting API Gateway (8081)..."
+cd "$BACKEND_DIR"
+timeout 300 java -jar api-gateway/target/api-gateway-1.0.0-SNAPSHOT.jar \
+  --SERVER_PORT=8081 \
+  --EUREKA_URI=$EUREKA_URI \
+  --SPRING_CONFIG_IMPORT=$CONFIG_SERVER_URI > /tmp/api-gateway.log 2>&1 &
+API_GATEWAY_PID=$!
+cd ..
+sleep 5
+echo "  Started (PID: $API_GATEWAY_PID)"
+echo ""
+
 # Start Delivery Service
 echo "▶ Starting Delivery Service (8085)..."
 cd "$BACKEND_DIR"
@@ -82,18 +95,61 @@ echo "╔═══════════════════════�
 echo "║   All Services Started!                                        ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
 echo ""
-echo "URLs:"
-echo "  Eureka Dashboard:  http://localhost:8761"
-echo "  Services Registered: http://localhost:8761/eureka/apps/"
+echo "═══════════════════════════════════════════════════════════════"
+echo "GATEWAY & DISCOVERY"
+echo "═══════════════════════════════════════════════════════════════"
+echo "  API Gateway (8081):"
+echo "    Main: http://localhost:8081"
+echo "    Swagger: http://localhost:8081/swagger-ui.html"
+echo "    Actuator: http://localhost:8081/actuator"
+echo "    Health: http://localhost:8081/actuator/health"
+echo "    Metrics: http://localhost:8081/actuator/metrics"
 echo ""
-echo "Health:"
+echo "  Eureka Discovery (8761):"
+echo "    Dashboard: http://localhost:8761"
+echo "    Registered Services: http://localhost:8761/eureka/apps/"
+echo "    Actuator: http://localhost:8761/actuator"
+echo "    Health: http://localhost:8761/actuator/health"
+echo ""
+echo "  Config Server (8888):"
+echo "    Actuator: http://localhost:8888/actuator"
+echo "    Health: http://localhost:8888/actuator/health"
+echo ""
+echo "═══════════════════════════════════════════════════════════════"
+echo "MICROSERVICES (via API Gateway)"
+echo "═══════════════════════════════════════════════════════════════"
+echo ""
+echo "  Payment Service (8084):"
+echo "    Direct: http://localhost:8084"
+echo "    via Gateway: http://localhost:8081/api/payments"
+echo "    Swagger (direct): http://localhost:8084/swagger-ui.html"
+echo "    Swagger (via gateway): http://localhost:8081/swagger-ui.html?urls.primaryName=Payment"
+echo "    Actuator: http://localhost:8084/actuator"
+echo "    Health: http://localhost:8084/actuator/health"
+echo ""
+echo "  Delivery Service (8085):"
+echo "    Direct: http://localhost:8085"
+echo "    via Gateway: http://localhost:8081/api/deliveries"
+echo "    Swagger (direct): http://localhost:8085/swagger-ui.html"
+echo "    Swagger (via gateway): http://localhost:8081/swagger-ui.html?urls.primaryName=Delivery"
+echo "    Actuator: http://localhost:8085/actuator"
+echo "    Health: http://localhost:8085/actuator/health"
+echo ""
+echo "═══════════════════════════════════════════════════════════════"
+echo "QUICK TEST COMMANDS (via API Gateway LoadBalancer)"
+echo "═══════════════════════════════════════════════════════════════"
+echo ""
+echo "  curl http://localhost:8081/actuator/health"
 echo "  curl http://localhost:8761/actuator/health"
-echo "  curl http://localhost:8085/actuator/health"
+echo "  curl http://localhost:8888/actuator/health"
 echo "  curl http://localhost:8084/actuator/health"
+echo "  curl http://localhost:8085/actuator/health"
 echo ""
+echo "═══════════════════════════════════════════════════════════════"
 echo "Stop: Press Ctrl+C"
+echo "═══════════════════════════════════════════════════════════════"
 echo ""
 
-trap "echo 'Stopping...'; kill $DISCOVERY_PID $CONFIG_PID $DELIVERY_PID $PAYMENT_PID 2>/dev/null; exit" INT TERM
+trap "echo 'Stopping...'; kill $DISCOVERY_PID $CONFIG_PID $API_GATEWAY_PID $DELIVERY_PID $PAYMENT_PID 2>/dev/null; exit" INT TERM
 
 wait

@@ -1,0 +1,104 @@
+spring:
+  application:
+    name: api-gateway
+  config:
+    import: optional:configserver:${SPRING_CONFIG_IMPORT:http://localhost:8888}
+  cloud:
+    gateway:
+      routes:
+        - id: payment
+          uri: lb://payment
+          predicates:
+            - Path=/api/payments/**
+        - id: delivery
+          uri: lb://delivery
+          predicates:
+            - Path=/api/deliveries/**
+        - id: catalog
+          uri: lb://catalog
+          predicates:
+            - Path=/api/catalog/**
+        - id: order
+          uri: lb://order
+          predicates:
+            - Path=/api/orders/**
+        - id: user
+          uri: lb://user
+          predicates:
+            - Path=/api/users/**
+        - id: notification
+          uri: lb://notification
+          predicates:
+            - Path=/api/notifications/**
+        - id: dispute
+          uri: lb://dispute
+          predicates:
+            - Path=/api/disputes/**
+      default-filters:
+        - name: Retry
+          args:
+            retries: 3
+            statuses: SERVICE_UNAVAILABLE,BAD_GATEWAY
+    loadbalancer:
+      ribbon:
+        enabled: false
+      round-robin:
+        enabled: true
+      cache:
+        ttl: 35s
+
+server:
+  port: ${SERVER_PORT:8081}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+    healthcheck:
+      enabled: true
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers,env,beans,mappings,configprops
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: Payment
+        url: /api/payments/v3/api-docs
+      - name: Delivery
+        url: /api/deliveries/v3/api-docs
+      - name: Catalog
+        url: /api/catalog/v3/api-docs
+      - name: Order
+        url: /api/orders/v3/api-docs
+      - name: User
+        url: /api/users/v3/api-docs
+      - name: Notification
+        url: /api/notifications/v3/api-docs
+      - name: Dispute
+        url: /api/disputes/v3/api-docs
+
+info:
+  app:
+    name: api-gateway
+    version: 1.0.0
+    description: API Gateway - point d'entrée unique pour tous les microservices (SoukTn)
+    team: SoukTn - 4SSA16 - Groupe 5
